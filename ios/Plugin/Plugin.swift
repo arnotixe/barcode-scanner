@@ -386,35 +386,48 @@ public class BarcodeScanner: CAPPlugin, AVCaptureMetadataOutputObjectsDelegate {
     }
 
     @objc func enableTorch(_ call: CAPPluginCall) {
-        guard 
-            let device = AVCaptureDevice.default(for: AVMediaType.video),
-            device.hasTorch
-        else { return }
+        guard let device = AVCaptureDevice.default(for: AVMediaType.video) else { return }
+        guard device.hasTorch else { return }
 
         do {
             try device.lockForConfiguration()
-            device.torchMode = .on
+
+            device.torchMode = AVCaptureDevice.TorchMode.on
+            } else {
+                do {
+                    try device.setTorchModeOn(level: 1.0)
+                } catch {
+                    print(error)
+                }
+            }
+
             device.unlockForConfiguration()
         } catch {
-            print("Torch could not be used")
+            print(error)
         }
-
         call.resolve()
     }
 
     @objc func disableTorch(_ call: CAPPluginCall) {
         // DRY I know
-        guard 
-            let device = AVCaptureDevice.default(for: AVMediaType.video),
-            device.hasTorch
-        else { return }
+        guard let device = AVCaptureDevice.default(for: AVMediaType.video) else { return }
+        guard device.hasTorch else { return }
 
         do {
             try device.lockForConfiguration()
-            device.torchMode = .off
+
+            device.torchMode = AVCaptureDevice.TorchMode.off
+            } else {
+                do {
+                    try device.setTorchModeOn(level: 1.0)
+                } catch {
+                    print(error)
+                }
+            }
+
             device.unlockForConfiguration()
         } catch {
-            print("Torch could not be used")
+            print(error)
         }
 
         call.resolve()
